@@ -657,12 +657,7 @@ window.retzefCacheProfile=window.retzefCacheProfile||function(profile){try{if(pr
   const tikTok=document.getElementById('retzefEntryTikTok');
   const guest=document.getElementById('retzefEntryGuest');
   const isInstalledApp=window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-  if(!isInstalledApp){
-    if(splash) splash.remove();
-    if(entry) entry.remove();
-    document.body.classList.remove('entry-screen-active');
-    return;
-  }
+  // בגרסת הבדיקה מסך הכניסה מוצג גם בדפדפן וגם כאשר האתר מותקן כאפליקציה.
   function closeScreens(){ if(splash){splash.classList.add('is-hidden');setTimeout(()=>splash.remove(),380);} if(entry)entry.classList.remove('is-visible'); document.body.classList.remove('entry-screen-active'); }
   function showChoice(){
     if(new URLSearchParams(location.search).get('tiktok_ok')==='1') return closeScreens();
