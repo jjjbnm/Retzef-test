@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 // TikTok OAuth callback for Vercel: api/callback.js
 const ROLES = {
   'ban.original': 'owner',
@@ -26,6 +27,29 @@ async function getProfile(username) { const url = process.env.KV_REST_API_URL ||
 async function deleteProfile(username) { if (!username) return; const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL; const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN; if (!url || !token) return; await fetch(`${url}/del/${encodeURIComponent(`retzef:profile:${String(username).toLowerCase()}`)}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); }
 async function getProfileByTikTokId(openId) { if (!openId) return null; const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL; const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN; if (!url || !token) return null; const r = await fetch(`${url}/get/${encodeURIComponent(`retzef:tiktok:open_id:${openId}`)}`, { headers: { Authorization: `Bearer ${token}` } }); const d = await r.json(); const username = d.result ? String(d.result) : ''; return username ? { username, profile: await getProfile(username) } : null; }
 async function saveTikTokIndex(openId, username) { if (!openId || !username) return; const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL; const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN; if (!url || !token) return; await fetch(`${url}/set/${encodeURIComponent(`retzef:tiktok:open_id:${openId}`)}/${encodeURIComponent(String(username).toLowerCase())}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }); }
+
+async function savePendingTikTok(token, data) {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const auth = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !auth) throw new Error('profile_storage_not_configured');
+  const response = await fetch(`${url}/set/${encodeURIComponent(`retzef:pending_tiktok:${token}`)}/${encodeURIComponent(JSON.stringify(data))}/EX/600`, { method: 'POST', headers: { Authorization: `Bearer ${auth}` } });
+  if (!response.ok) throw new Error('profile_storage_error');
+}
+async function getPendingTikTok(token) {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const auth = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !auth || !token) return null;
+  const response = await fetch(`${url}/get/${encodeURIComponent(`retzef:pending_tiktok:${token}`)}`, { headers: { Authorization: `Bearer ${auth}` } });
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data.result ? (typeof data.result === 'string' ? JSON.parse(data.result) : data.result) : null;
+}
+async function deletePendingTikTok(token) {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const auth = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !auth || !token) return;
+  await fetch(`${url}/del/${encodeURIComponent(`retzef:pending_tiktok:${token}`)}`, { method: 'POST', headers: { Authorization: `Bearer ${auth}` } });
+}
 function getCookie(req, name) { const raw = req.headers?.cookie || ''; const hit = raw.split(';').map(x => x.trim()).find(x => x.startsWith(`${name}=`)); return hit ? decodeURIComponent(hit.slice(name.length + 1)) : ''; }
 async function getJoinRequest(username) { const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL; const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN; if (!url || !token) return null; const r = await fetch(`${url}/lrange/retzef%3Ajoin%3Arequests/0/199`, { headers: { Authorization: `Bearer ${token}` } }); const d = await r.json(); return (d.result || []).map(x => { try { return typeof x === 'string' ? JSON.parse(x) : x; } catch (_) { return null; } }).find(x => x && String(x.username || '').toLowerCase() === String(username || '').toLowerCase()) || null; }
 
@@ -98,6 +122,18 @@ module.exports = async (req, res) => {
     const rawUsername = user.username || displayName || user.open_id || '';
     const username = String(rawUsername).trim();
     if (!username) return res.redirect(302, '/?tiktok_error=missing_username');
+    if (String(query.state || '') === 'retzef_create_account') {
+      try {
+        const existing = await getProfileByTikTokId(user.open_id);
+        if (existing?.username) return res.redirect(302, `/?tiktok_existing=1&username=${encodeURIComponent(existing.username)}`);
+        const token = crypto.randomBytes(24).toString('base64url');
+        await savePendingTikTok(token, { openId: user.open_id || '', unionId: user.union_id || '', tiktokUsername: username, displayName: displayName || username, avatarUrl: user.avatar_url || '', createdAt: Date.now() });
+        return res.redirect(302, `/?tiktok_setup=${encodeURIComponent(token)}&avatar=${encodeURIComponent(user.avatar_url || '')}&display_name=${encodeURIComponent(displayName || username)}`);
+      } catch (setupError) {
+        console.error('TikTok account setup error:', setupError.message);
+        return res.redirect(302, '/?tiktok_error=setup_storage_error');
+      }
+    }
     const addAccountFlow = ['retzef_add_account', 'wallet_add_account'].includes(String(query.state || ''));
     const previousUsername = addAccountFlow ? '' : getCookie(req, 'retzef_profile_id');
     const indexed = await getProfileByTikTokId(user.open_id);

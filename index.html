@@ -635,7 +635,10 @@ window.retzefCacheProfile=window.retzefCacheProfile||function(profile){try{if(pr
 })();
 </script>
 <div id="retzefSplash" aria-label="טוען את רצף"><div class="retzef-splash-inner"><img class="retzef-splash-logo" src="/icons/icon-512.png" alt="לוגו רצף"><div class="retzef-loading-track" aria-label="טוען"><div class="retzef-loading-bar"></div></div></div></div>
-<div id="retzefEntryChoice" role="dialog" aria-modal="true" aria-labelledby="retzefEntryTitle"><div class="retzef-entry-card"><img src="/icons/icon-512.png" alt="לוגו רצף"><h1 id="retzefEntryTitle">ברוכים הבאים לרצף</h1><p>בחרו איך להיכנס לאפליקציה</p><div class="retzef-entry-actions"><button type="button" id="retzefEntryTikTok">התחברות עם TikTok</button><button type="button" id="retzefEntryGuest">המשך כאורח</button></div></div></div>
+<div id="retzefEntryChoice" role="dialog" aria-modal="true" aria-labelledby="retzefEntryTitle"><div class="retzef-entry-card"><img src="/icons/icon-512.png" alt="לוגו רצף"><h1 id="retzefEntryTitle">ברוכים הבאים לרצף</h1><p>בחרו איך להיכנס לאפליקציה</p><div class="retzef-entry-actions"><button type="button" id="retzefEntryTikTok">התחברות עם משתמש</button><button type="button" id="retzefEntryGuest">המשך כאורח</button></div></div></div>
+<div class="modal-overlay" id="retzefAccountChooserModal" role="dialog" aria-modal="true" aria-labelledby="retzefAccountChooserTitle"><div class="modal-card" style="text-align:center;max-width:400px;direction:rtl;"><button type="button" class="modal-close" id="retzefAccountChooserClose" aria-label="סגירה">✕</button><div class="modal-icon">👤</div><h3 id="retzefAccountChooserTitle">התחברות עם משתמש</h3><p style="color:var(--muted);line-height:1.7;">בחרו איך להיכנס לחשבון רצף.</p><div style="display:grid;gap:10px;"><button type="button" id="retzefExistingAccountBtn" class="btn btn-primary">יש לי כבר חשבון</button><button type="button" id="retzefCreateAccountBtn" class="btn btn-ghost glass">יצירת חשבון</button></div></div></div>
+<div class="modal-overlay" id="retzefCreateAccountModal" role="dialog" aria-modal="true" aria-labelledby="retzefCreateAccountTitle"><div class="modal-card" style="text-align:right;max-width:470px;direction:rtl;max-height:90vh;overflow:auto;"><button type="button" class="modal-close" id="retzefCreateAccountClose" aria-label="סגירה">✕</button><h3 id="retzefCreateAccountTitle">יצירת חשבון רצף</h3><p id="retzefCreateAccountIntro" style="color:var(--muted);line-height:1.7;">מעביר אותך לטיקטוק, זה ייקח כחמש שניות. TikTok משמש רק לאימות הראשוני.</p><form id="retzefCreateAccountForm"><input type="hidden" id="retzefTikTokSetupToken"><label style="display:block;margin:10px 0;font-weight:700;">תמונת פרופיל</label><div id="retzefAvatarChoices" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;"><button type="button" class="retzef-avatar-choice" data-avatar-choice="tiktok" style="border:2px solid var(--accent);border-radius:14px;background:var(--glass);padding:10px;cursor:pointer;"><img id="retzefTikTokAvatarPreview" src="/icons/icon-192.png" alt="תמונת TikTok" style="width:72px;height:72px;border-radius:50%;object-fit:cover;display:block;margin:auto;"><span>תמונת TikTok</span></button><button type="button" class="retzef-avatar-choice" data-avatar-choice="retzef" style="border:1px solid var(--glass-border);border-radius:14px;background:var(--glass);padding:10px;cursor:pointer;"><img src="/icons/icon-192.png" alt="לוגו רצף" style="width:72px;height:72px;border-radius:50%;object-fit:cover;display:block;margin:auto;"><span>לוגו רצף</span></button></div><input type="hidden" id="retzefAvatarChoice" value="tiktok"><label style="display:block;margin:10px 0;font-weight:700;">username <span style="color:#b91c1c;">*</span><input id="retzefCreateUsername" dir="ltr" pattern="[A-Za-z0-9._-]{2,128}" maxlength="128" required placeholder="username" autocomplete="off"></label><label style="display:block;margin:10px 0;font-weight:700;">display name <span style="font-weight:400;color:var(--muted);font-size:12px;">(לא חובה)</span><input id="retzefCreateDisplayName" maxlength="120" placeholder="ברירת מחדל: השם ב-TikTok"></label><label style="display:block;margin:10px 0;font-weight:700;">בן או בת <span style="font-weight:400;color:var(--muted);font-size:12px;">(לא חובה)</span><select id="retzefCreateGender"><option value="">לא נמסר</option><option value="בן">בן</option><option value="בת">בת</option></select></label><label style="display:block;margin:10px 0;font-weight:700;">גיל <span style="color:#b91c1c;">*</span><input id="retzefCreateAge" type="number" min="1" max="120" required placeholder="הגיל שלך"></label><button type="submit" id="retzefCreateSubmit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;">יצירת משתמש</button><div id="retzefCreateResult" style="margin-top:10px;font-size:13px;white-space:pre-line;"></div></form></div></div>
+
 
 <noscript>
   <div style="position:fixed;inset:0;z-index:2147483647;background:#f6f7fb;color:#161a26;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;direction:rtl;font-family:Arial,sans-serif;">
@@ -661,14 +664,21 @@ window.retzefCacheProfile=window.retzefCacheProfile||function(profile){try{if(pr
   function closeScreens(){ if(splash){splash.classList.add('is-hidden');setTimeout(()=>splash.remove(),380);} if(entry)entry.classList.remove('is-visible'); document.body.classList.remove('entry-screen-active'); }
   function showChoice(){
     if(new URLSearchParams(location.search).get('tiktok_ok')==='1') return closeScreens();
-    if(window.__retzefProfile) return closeScreens();
     if(splash){splash.classList.add('is-hidden');setTimeout(()=>splash.remove(),380);}
     if(entry)entry.classList.add('is-visible');
   }
+  try{
+    if(sessionStorage.getItem('retzef_test_session_reset')!=='1'){
+      sessionStorage.setItem('retzef_test_session_reset','1');
+      localStorage.removeItem('retzef_current_profile'); localStorage.removeItem('retzef_logged_out');
+      document.cookie='retzef_profile_id=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+      fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'}),credentials:'include'}).catch(()=>{});
+    }
+  }catch(_){ }
   document.body.classList.add('entry-screen-active');
   setTimeout(showChoice,1100);
   window.__retzefCloseEntryScreens=closeScreens;
-  if(tikTok) tikTok.addEventListener('click',()=>{closeScreens();if(typeof startTikTokLogin==='function'){startTikTokLogin(false);}else{const button=document.getElementById('tiktokLoginBtn');if(button)button.click();}});
+  if(tikTok) tikTok.addEventListener('click',()=>{closeScreens();if(typeof openAccountChooser==='function')openAccountChooser();});
   if(guest) guest.addEventListener('click',closeScreens);
 })();
 </script>
@@ -770,10 +780,10 @@ window.retzefCacheProfile=window.retzefCacheProfile||function(profile){try{if(pr
 <div class="modal-overlay" id="loginRequiredModal" role="dialog" aria-modal="true" aria-labelledby="loginRequiredTitle">
   <div class="modal-card" style="text-align:center;max-width:390px;">
     <div class="modal-icon">🔐</div>
-    <h3 id="loginRequiredTitle">חייב להיות מחובר לחשבון TikTok</h3>
-    <p style="color:var(--muted);line-height:1.7;">כדי להיכנס לטאב מנויים או חנות צריך להתחבר לחשבון TikTok.</p>
+    <h3 id="loginRequiredTitle">חייבים להיות מחוברים לחשבון רצף</h3>
+    <p style="color:var(--muted);line-height:1.7;">כדי להיכנס לטאב מנויים או חנות צריך להתחבר לחשבון רצף.</p>
     <div class="modal-actions" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button type="button" id="loginRequiredContinue" class="btn btn-primary">להמשיך לטיקטוק</button>
+      <button type="button" id="loginRequiredContinue" class="btn btn-primary">להתחברות עם משתמש</button>
       <button type="button" id="loginRequiredHome" class="btn btn-ghost glass">לחזור לבית</button>
     </div>
   </div>
@@ -845,7 +855,7 @@ window.retzefCacheProfile=window.retzefCacheProfile||function(profile){try{if(pr
     <div class="cta-row">
       <button type="button" id="quickAccountLoginEntryBtn" class="btn btn-ghost glass">⚡ התחברות מהירה</button><button type="button" id="tiktokLoginBtn" class="btn btn-tiktok">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/></svg>
-        <span data-i18n="hero_login_btn">התחברות עם TikTok</span>
+        <span data-i18n="hero_login_btn">התחברות עם משתמש</span>
       </button>
       <button type="button" id="joinWebsiteBtn" class="btn btn-ghost glass">הצטרפות דרך האתר</button>
       <a href="#" data-target="contact" class="btn btn-ghost glass tab-jump" data-i18n="hero_tiktok_page_btn">עמוד TikTok של רצף</a>
@@ -1664,7 +1674,7 @@ window.retzefCacheProfile=window.retzefCacheProfile||function(profile){try{if(pr
   const tiktokGroupLink = document.getElementById('tiktokGroupLink');
   if (tiktokGroupLink) tiktokGroupLink.href = TIKTOK_GROUP_URL;
 
-  document.getElementById('tiktokLoginBtn').addEventListener('click', function(){ startTikTokLogin(false); });
+  document.getElementById('tiktokLoginBtn').addEventListener('click', function(){ openAccountChooser(); });
   const profileMenu=document.getElementById('profileMenu');
   const profileMenuUser=document.getElementById('profileMenuUser');
   document.getElementById('profileAvatar').addEventListener('click', function(){
@@ -1793,9 +1803,10 @@ window.retzefCacheProfile=window.retzefCacheProfile||function(profile){try{if(pr
   document.getElementById('joinForm').addEventListener('submit',async e=>{e.preventDefault();const result=document.getElementById('joinResult');const button=e.target.querySelector('button[type="submit"]');button.disabled=true;result.textContent='שולח ושומר את הבקשה...';try{const r=await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'join',name:document.getElementById('joinName').value.trim(),username:document.getElementById('joinUsername').value.trim(),age:Number(document.getElementById('joinAge').value),gender:document.getElementById('joinGender').value})});const d=await r.json();if(!r.ok||d.saved!==true)throw new Error(d.error||'join_failed');result.textContent='✅ הבקשה נשלחה ונשמרה במסד הנתונים. הבאן המקורי יקבל אותה לבדיקה.';e.target.reset();try{const mine=await fetch('/api/users?joinMine=1').then(x=>x.json());if(mine.requests?.[0]?.status&&mine.requests[0].status!=='new')result.textContent+= ' מצב: '+(mine.requests[0].status==='approved'?'אושרה':'נדחתה');}catch(_){}}catch(_){result.textContent='❌ לא ניתן לשמור ולשלוח כרגע. נסו שוב.';}button.disabled=false;});
 
   let forceTikTokAccountChooser=false;
-  function startTikTokLogin(forceChooser){
+  function startTikTokLogin(forceChooser, flowState){
     forceTikTokAccountChooser=forceChooser===true;
-    const params=new URLSearchParams({client_key:TIKTOK_CLIENT_KEY,scope:'user.info.basic,user.info.profile',response_type:'code',redirect_uri:TIKTOK_REDIRECT_URI,state:forceTikTokAccountChooser?'retzef_add_account':'retzef',disable_auto_auth:forceTikTokAccountChooser?'1':'0'});
+    const state=flowState || (forceTikTokAccountChooser?'retzef_add_account':'retzef');
+    const params=new URLSearchParams({client_key:TIKTOK_CLIENT_KEY,scope:'user.info.basic,user.info.profile',response_type:'code',redirect_uri:TIKTOK_REDIRECT_URI,state,disable_auto_auth:(forceTikTokAccountChooser||state==='retzef_create_account')?'1':'0'});
     window.location.assign('https://www.tiktok.com/v2/auth/authorize/?'+params.toString());
   }
   document.getElementById('consentYes').addEventListener('click', function(){closeConsentModal();startTikTokLogin(forceTikTokAccountChooser);});
@@ -2989,5 +3000,20 @@ function openPaypalModal(itemName, price){
 })();
 </script>
 <script id="retzef-quick-account-login">(function(){const m=document.getElementById('quickAccountLoginModal');const open=()=>m?.classList.add('open');['quickAccountLoginBtn','quickAccountLoginEntryBtn'].forEach(id=>document.getElementById(id)?.addEventListener('click',()=>{document.getElementById('consentModal')?.classList.remove('open');open();}));document.getElementById('quickAccountLoginClose')?.addEventListener('click',()=>m?.classList.remove('open'));document.getElementById('quickAccountLoginSubmit')?.addEventListener('click',async()=>{const input=document.getElementById('quickAccountCredential'),out=document.getElementById('quickAccountLoginResult'),b=document.getElementById('quickAccountLoginSubmit');b.disabled=true;out.textContent='מתחבר...';try{const r=await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'quickLogin',credential:input.value.trim()})});const d=await r.json();if(!r.ok)throw new Error();out.textContent=d.scope==='owner'?'✅ התחברת עם גישה מלאה.':d.scope==='readonly'?'✅ התחברת לצפייה בלבד.':'✅ התחברת עם גישה ציבורית מוגבלת.';setTimeout(()=>location.reload(),500);}catch(_){out.textContent='❌ המפתח לא תקין.';b.disabled=false;}});})();</script>
+<script id="retzef-test-account-flow">(function(){
+  const chooser=document.getElementById('retzefAccountChooserModal'), create=document.getElementById('retzefCreateAccountModal');
+  const close=(m)=>m?.classList.remove('open'); const open=(m)=>m?.classList.add('open');
+  window.openAccountChooser=()=>{close(create);open(chooser);};
+  document.getElementById('retzefAccountChooserClose')?.addEventListener('click',()=>close(chooser));
+  chooser?.addEventListener('click',e=>{if(e.target===chooser)close(chooser);});
+  document.getElementById('retzefExistingAccountBtn')?.addEventListener('click',()=>{close(chooser);document.getElementById('quickAccountLoginModal')?.classList.add('open');});
+  document.getElementById('retzefCreateAccountBtn')?.addEventListener('click',()=>{close(chooser);open(create);const form=document.getElementById('retzefCreateAccountForm');if(form)form.style.display='none';const intro=document.getElementById('retzefCreateAccountIntro');let seconds=5;intro.textContent='מעביר אותך לטיקטוק בעוד '+seconds+' שניות...';const timer=setInterval(()=>{seconds--;if(seconds>0)intro.textContent='מעביר אותך לטיקטוק בעוד '+seconds+' שניות...';},1000);setTimeout(()=>{clearInterval(timer);if(typeof startTikTokLogin==='function')startTikTokLogin(false,'retzef_create_account');},5000);});
+  document.getElementById('retzefCreateAccountClose')?.addEventListener('click',()=>close(create));
+  create?.addEventListener('click',e=>{if(e.target===create)close(create);});
+  document.querySelectorAll('.retzef-avatar-choice').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.retzef-avatar-choice').forEach(x=>x.style.border='1px solid var(--glass-border)');btn.style.border='2px solid var(--accent)';document.getElementById('retzefAvatarChoice').value=btn.dataset.avatarChoice;}));
+  const params=new URLSearchParams(location.search), setup=params.get('tiktok_setup'), avatar=params.get('avatar'), display=params.get('display_name');
+  if(setup){document.getElementById('retzefCreateAccountForm').style.display='block';document.getElementById('retzefTikTokSetupToken').value=setup;document.getElementById('retzefCreateDisplayName').value=display||'';if(avatar)document.getElementById('retzefTikTokAvatarPreview').src=avatar;document.getElementById('retzefCreateAccountIntro').textContent='אימות TikTok הצליח. עכשיו בחרו את פרטי חשבון רצף שלכם.';open(create);params.delete('tiktok_setup');params.delete('avatar');params.delete('display_name');history.replaceState({},'',location.pathname+(params.toString()?'?'+params.toString():''));}
+  if(params.get('tiktok_existing')==='1'){open(chooser);const note=document.createElement('p');note.textContent='כבר קיים חשבון רצף שמקושר ל-TikTok הזה. בחרו “יש לי כבר חשבון”.';note.style.color='#b91c1c';chooser.querySelector('.modal-card')?.appendChild(note);params.delete('tiktok_existing');params.delete('username');history.replaceState({},'',location.pathname+(params.toString()?'?'+params.toString():''));}
+  document.getElementById('retzefCreateAccountForm')?.addEventListener('submit',async e=>{e.preventDefault();const b=document.getElementById('retzefCreateSubmit'),out=document.getElementById('retzefCreateResult');b.disabled=true;b.textContent='יוצר משתמש...';out.textContent='';try{const r=await fetch('/api/users',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'createRetzefAccount',tiktokSetupToken:document.getElementById('retzefTikTokSetupToken').value,username:document.getElementById('retzefCreateUsername').value.trim(),displayName:document.getElementById('retzefCreateDisplayName').value.trim(),gender:document.getElementById('retzefCreateGender').value,age:Number(document.getElementById('retzefCreateAge').value),avatarChoice:document.getElementById('retzefAvatarChoice').value})});const d=await r.json();if(!r.ok)throw new Error(d.error==='username_taken'?'שם המשתמש כבר תפוס.':d.error==='tiktok_already_linked'?'ה-TikTok כבר מקושר לחשבון אחר.':'לא ניתן ליצור את המשתמש כרגע.');window.__retzefProfile=d.profile;if(window.retzefCacheProfile)window.retzefCacheProfile(d.profile);const avatarBox=document.getElementById('profileAvatar'),avatarImg=document.getElementById('profileAvatarImg');if(d.profile.avatarUrl&&avatarImg){avatarImg.src=d.profile.avatarUrl;avatarBox?.classList.add('logged-in');}try{localStorage.setItem('retzef_current_profile',JSON.stringify(d.profile));localStorage.removeItem('retzef_logged_out');}catch(_){}close(create);window.__retzefCloseEntryScreens?.();document.getElementById('tiktokAuthStatus').textContent='✅ חשבון רצף נוצר. מחובר/ת בתור @'+d.profile.username;document.getElementById('tiktokAuthStatus').style.display='block';}catch(err){out.textContent='❌ '+err.message;b.disabled=false;b.textContent='יצירת משתמש';}});})();</script>
 </body>
   </html>

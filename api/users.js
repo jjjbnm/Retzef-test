@@ -129,6 +129,29 @@ module.exports = async (req, res) => {
     } catch(e) { return res.status(503).json({error:'storage_error'}); }
   }
 
+  if (req.method === 'POST' && action === 'createRetzefAccount') {
+    try {
+      const token = String(input.tiktokSetupToken || '').trim();
+      const username = String(input.username || '').replace(/^@/, '').trim().toLowerCase();
+      const displayName = String(input.displayName || '').trim().slice(0, 120);
+      const gender = String(input.gender || '').trim();
+      const age = Number(input.age);
+      const avatarChoice = input.avatarChoice === 'retzef' ? 'retzef' : 'tiktok';
+      if (!token || !/^[a-z0-9._-]{2,128}$/.test(username) || !Number.isInteger(age) || age < 1 || age > 120 || !['', 'בן', 'בת'].includes(gender)) return res.status(400).json({ error: 'invalid_account_details' });
+      const pendingRaw = await redis('get', `retzef:pending_tiktok:${token}`);
+      const pending = pendingRaw ? (typeof pendingRaw === 'string' ? JSON.parse(pendingRaw) : pendingRaw) : null;
+      if (!pending || Date.now() - Number(pending.createdAt || 0) > 600000) return res.status(400).json({ error: 'tiktok_setup_expired' });
+      if (await profile(username)) return res.status(409).json({ error: 'username_taken' });
+      const indexedRaw = pending.openId ? await redis('get', `retzef:tiktok:open_id:${pending.openId}`) : null;
+      if (indexedRaw) return res.status(409).json({ error: 'tiktok_already_linked', username: String(indexedRaw) });
+      const account = { username, displayName: displayName || pending.displayName || pending.tiktokUsername || username, avatarUrl: avatarChoice === 'retzef' ? '/icons/icon-512.png' : String(pending.avatarUrl || ''), avatarChoice, gender, age, role: 'member', banned: false, banReason: '', tiktokOpenId: String(pending.openId || ''), tiktokUnionId: String(pending.unionId || ''), tiktokUsername: String(pending.tiktokUsername || ''), tiktokDisplayName: String(pending.displayName || ''), wallet: { balance: 0, transactions: [] }, privacy: { statusVisible: true, subscriptionVisible: false }, createdAt: new Date().toISOString(), lastSeen: Date.now() };
+      await redis('set', `${PREFIX}${username}`, JSON.stringify(account));
+      if (pending.openId) await redis('set', `retzef:tiktok:open_id:${pending.openId}`, username);
+      await redis('del', `retzef:pending_tiktok:${token}`);
+      res.setHeader('Set-Cookie', `retzef_profile_id=${encodeURIComponent(username)}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`);
+      return res.status(201).json({ created: true, profile: { ...publicUser(account), age, gender, wallet: walletOf(account) } });
+    } catch (e) { console.error('create Retzef account:', e.message); return res.status(503).json({ error: e.message === 'storage_not_configured' ? e.message : 'storage_error' }); }
+  }
   const me = cookie(req, 'retzef_profile_id').toLowerCase();
   if (req.method === 'GET' && input.joinMine === '1') { try { const id = cookie(req, 'retzef_join_id'); const rows = await joinRequests(); return res.status(200).json({ requests: id ? rows.filter(x => x.id === id).map(x => ({ id: x.id, status: x.status, reason: x.reason || '', createdAt: x.createdAt })) : [] }); } catch (_) { return res.status(503).json({ error: 'storage_error' }); } }
   if (!me) return res.status(401).json({ error: 'tiktok_login_required' });
